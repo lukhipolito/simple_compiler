@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SCompiler": {
+      "commandName": "Project",
+      "commandLineArgs": "emailProf.txt"
+    }
+  }
+}

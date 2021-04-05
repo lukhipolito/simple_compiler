@@ -1,0 +1,13 @@
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\bin\Debug\netcoreapp3.1\SCompiler.exe
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\bin\Debug\netcoreapp3.1\SCompiler.deps.json
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\bin\Debug\netcoreapp3.1\SCompiler.runtimeconfig.json
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\bin\Debug\netcoreapp3.1\SCompiler.runtimeconfig.dev.json
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\bin\Debug\netcoreapp3.1\SCompiler.dll
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\bin\Debug\netcoreapp3.1\SCompiler.pdb
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\obj\Debug\netcoreapp3.1\SCompiler.csprojAssemblyReference.cache
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\obj\Debug\netcoreapp3.1\SCompiler.AssemblyInfoInputs.cache
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\obj\Debug\netcoreapp3.1\SCompiler.AssemblyInfo.cs
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\obj\Debug\netcoreapp3.1\SCompiler.csproj.CoreCompileInputs.cache
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\obj\Debug\netcoreapp3.1\SCompiler.dll
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\obj\Debug\netcoreapp3.1\SCompiler.pdb
+C:\Users\lucashipolito\Documents\Lucas Hipolito\Study\iesb\Compiladores\project\SIMPLE Compiler\SCompiler\SCompiler\obj\Debug\netcoreapp3.1\SCompiler.genruntimeconfig.cache
