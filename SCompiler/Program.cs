@@ -25,7 +25,7 @@ namespace SCompiler
     ///  }
     ///  
     ///  P = Produções = {
-    ///     programa   -> <linha>end
+    ///     programa   -> <linha><N>end
     ///     
     ///     linha      -> <comando> | <comando><linha>
     ///     
@@ -106,7 +106,72 @@ namespace SCompiler
         private bool qPrograma()
         {
             this.state = "Programa";
-            return true;
+            if (qLinha())
+            {
+                nextToken(state);
+                if(qN() != string.Empty)
+                {
+                    if ('e' == getToken())
+                    {
+                        nextToken(state);
+                        if ('n' == getToken())
+                        {
+                            nextToken(state);
+                            if ('d' == getToken())
+                            {
+                                return true;
+                            }
+                            error(state, 'd');
+                            return false;
+                        }
+                        error(state, 'n');
+                        return false;
+                    }
+                    error(state, "end");
+                    return false;
+                }
+                errorN();
+                return false;
+            }
+            return false;
+        }
+
+        private bool qLinha()
+        {
+            this.state = "Linha";
+
+            if (qComando())
+            {
+                nextToken(state);
+                if (qLinha())
+                {
+                    return true;
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool qComando()
+        {
+            this.state = "Comando";
+            if (qN() != string.Empty)
+            {
+                if(' ' == getToken())
+                {
+                    nextToken(state);
+                    if (qPalavra())
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                errorEspaco();
+                return false;
+            }
+            errorN();
+            return false;
         }
 
         private bool qPalavra()
@@ -147,7 +212,7 @@ namespace SCompiler
                             }
                             return false;
                         }
-                        error(state, "espaço em branco");
+                        errorEspaco();
                         return false;
                     }
                     error(state, 't');
@@ -159,17 +224,136 @@ namespace SCompiler
 
             if('p' == getToken())
             {
-
+                nextToken(state);
+                if('r' == getToken())
+                {
+                    nextToken(state);
+                    if('i' == getToken())
+                    {
+                        nextToken(state);
+                        if('n' == getToken())
+                        {
+                            nextToken(state);
+                            if('t' == getToken())
+                            {
+                                nextToken(state);
+                                if(' ' == getToken())
+                                {
+                                    nextToken(state);
+                                    if (qId())
+                                    {
+                                        return true;
+                                    }
+                                    errorId();
+                                    return false;
+                                }
+                                errorEspaco();
+                                return false;
+                            }
+                            error(state, 't');
+                            return false;
+                        }
+                        error(state, 'n');
+                    }
+                    error(state, 'i');
+                    return false;
+                }
+                error(state, 'r');
+                return false;
             }
 
             if('g' == getToken())
             {
-
+                nextToken(state);
+                if('o' == getToken())
+                {
+                    nextToken(state);
+                    if('t' == getToken())
+                    {
+                        nextToken(state);
+                        if('o' == getToken())
+                        {
+                            nextToken(state);
+                            if(' ' == getToken())
+                            {
+                                nextToken(state);
+                                if(qN() != string.Empty)
+                                {
+                                    return true;
+                                }
+                                errorN();
+                                return false;
+                            }
+                            errorEspaco();
+                            return false;
+                        }
+                        error(state, 'o');
+                        return false;
+                    }
+                    error(state, 't');
+                    return false;
+                }
+                error(state, 'o');
+                return false;
             }
 
             if('i' == getToken())
             {
+                nextToken(state);
 
+                if('n' == getToken())
+                {
+                    nextToken(state);
+                    if('p' == getToken())
+                    {
+                        nextToken(state);
+                        if('u' == getToken())
+                        {
+                            nextToken(state);
+                            if('t' == getToken())
+                            {
+                                nextToken(state);
+                                if(' ' == getToken())
+                                {
+                                    nextToken(state);
+                                    if (qId())
+                                    {
+                                        return true;
+                                    }
+                                    errorId();
+                                    return false;
+                                }
+                                errorEspaco();
+                                return false;
+                            }
+                            error(state, 't');
+                            return false;
+                        }
+                        error(state, 'u');
+                        return false;
+                    }
+                    error(state, 'p');
+                    return false;
+                }
+
+                if('f' == getToken())
+                {
+                    nextToken(state);
+                    if(' ' == getToken())
+                    {
+                        nextToken(state);
+                        if (qCorpoIf())
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                    errorEspaco();
+                    return false;
+                }
+
+                error(state, 'n', 'f');
+                return false;
             }
 
             error(state, "if", "input", "goto", "rem", "let", "print");
@@ -205,16 +389,12 @@ namespace SCompiler
                                     {
                                         return true;
                                     }
-                                    error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                                        'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                                        'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                                    errorIdN();
 
                                     return false;
-
                                 }
 
-                                error(state, '+', '-', '*', '/', '%');
+                                errorOpr();
                                 return false;
                             }
 
@@ -222,10 +402,7 @@ namespace SCompiler
                             {
                                 return true;
                             }
-                            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                            errorIdN();
 
                             return false;
                         }
@@ -244,14 +421,11 @@ namespace SCompiler
                                 {
                                     return true;
                                 }
-                                error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                                    'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                                    'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                                errorIdN();
 
                                 return false;
                             }
-                            error(state, '+', '-', '*', '/', '%');
+                            errorOpr();
 
                             return false;
                         }
@@ -261,10 +435,7 @@ namespace SCompiler
                             return true;
                         }
 
-                        error(state, ' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                        errorIdNEspaco();
 
                         return false;
                     }
@@ -273,7 +444,7 @@ namespace SCompiler
                     return false;
                 }
 
-                if ('=' == getToken())
+                if('=' == getToken())
                 {
                     nextToken(state);
                     if (' ' == getToken())
@@ -316,10 +487,7 @@ namespace SCompiler
                             {
                                 return true;
                             }
-                            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                            errorIdN();
 
                             return false;
                         }
@@ -331,13 +499,11 @@ namespace SCompiler
                     }
                 }
 
-                error(state, ' ', '=');
+                error(state, "espaço em branco", "=");
                 return false;
             }
 
-            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
+            errorId();
 
             return false;
         }
@@ -375,8 +541,10 @@ namespace SCompiler
                                                 {
                                                     return true;
                                                 }
+                                                errorN();
+                                                return false;
                                             }
-                                            error(state, ' ');
+                                            errorEspaco();
                                             return false;
                                         }
                                         error(state, 'o');
@@ -396,7 +564,6 @@ namespace SCompiler
                     }
                     if(qN() != string.Empty)
                     {
-                        nextToken(state);
                         if (' ' == getToken())
                         {
                             nextToken(state);
@@ -419,8 +586,10 @@ namespace SCompiler
                                                 {
                                                     return true;
                                                 }
+                                                errorN();
+                                                return false;
                                             }
-                                            error(state, ' ');
+                                            errorEspaco();
                                             return false;
                                         }
                                         error(state, 'o');
@@ -435,22 +604,17 @@ namespace SCompiler
                             error(state, 'g');
                             return false;
                         }
-                        error(state, ' ');
+                        errorEspaco();
                         return false;
                     }
-                    error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                        'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                        'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+                    errorIdN();
 
                     return false;
                 }
-                error(state, '=', '!', '<', '>');
+                errorComp();
                 return false;
             }
-            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
+            errorId();
 
             return false;
         }
@@ -511,9 +675,7 @@ namespace SCompiler
                 return true;
             }
 
-            error(state,
-                'a', 'b','c','d', 'e','f', 'g','h','i','j','k','l','m','n','o','p',
-                'q','r','s', 't', 'u', 'v', 'w', 'x', 'y', 'z');
+            errorId();
             return false;
         }
 
@@ -529,7 +691,7 @@ namespace SCompiler
                 return true;
             }
 
-            error(state, '+', '-', '*', '/', '%');
+            errorOpr();
             return false;
         }
 
@@ -580,7 +742,7 @@ namespace SCompiler
                 return false;
             }
 
-            error(state, '<', '>', '=', '!');
+            errorComp();
             return false;
         }
 
@@ -652,6 +814,46 @@ namespace SCompiler
             }
 
             Console.WriteLine("'\n");
+        }
+
+        private void errorId()
+        {
+            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
+        }
+
+        private void errorIdN()
+        {
+            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+                        'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+                        'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        }
+
+        private void errorIdNEspaco()
+        {
+            error(state, "id (letras a-z)", "número (0-9)", "espaço em branco");
+        }
+
+        private void errorOpr()
+        {
+            error(state, '+', '-', '*', '/', '%');
+        }
+
+        private void errorComp()
+        {
+            error(state, '<', '>', '=', '!');
+        }
+
+        private void errorEspaco()
+        {
+            error(state, "espaço em branco");
+        }
+
+        private void errorN()
+        {
+            error(state, "número (0-9)");
         }
 
         /// <summary>
