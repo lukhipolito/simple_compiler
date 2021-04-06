@@ -25,7 +25,7 @@ namespace SCompiler
     ///  }
     ///  
     ///  P = Produções = {
-    ///     programa   -> <linha><N>end
+    ///     programa   -> <linha>
     ///     
     ///     linha      -> <comando> | <comando><linha>
     ///     
@@ -35,7 +35,7 @@ namespace SCompiler
     ///                   0<N> | 1<N> | 2<N> | 3<N> | 4<N> | 5<N> | 6<N> | 7<N> | 8<N> | 9<N>
     ///                     
     ///     palavra    -> rem | input <id> | let <corpoLet> | 
-    ///                   print <id> | goto <N> | if <corpoIf>
+    ///                   print <id> | goto <N> | if <corpoIf> | end
     ///                     
     ///     corpoLet   -> <id> = <id><opr><id> | <id> = <id><opr><N> | <id> = <N>
     ///     
@@ -108,30 +108,7 @@ namespace SCompiler
             this.state = "Programa";
             if (qLinha())
             {
-                nextToken(state);
-                if(qN() != string.Empty)
-                {
-                    if ('e' == getToken())
-                    {
-                        nextToken(state);
-                        if ('n' == getToken())
-                        {
-                            nextToken(state);
-                            if ('d' == getToken())
-                            {
-                                return true;
-                            }
-                            error(state, 'd');
-                            return false;
-                        }
-                        error(state, 'n');
-                        return false;
-                    }
-                    error(state, "end");
-                    return false;
-                }
-                errorN();
-                return false;
+                return true;
             }
             return false;
         }
@@ -143,11 +120,38 @@ namespace SCompiler
             if (qComando())
             {
                 nextToken(state);
-                if (qLinha())
+                if('\r' == getToken())
+                {
+                    nextToken(state);
+                    if('\n' == getToken())
+                    {
+                        nextToken(state);
+                        if (qLinha())
+                        {
+                            return true;
+                        }
+                        return true;
+                    }
+                    error(state, "quebra de linha");
+                    return false;
+                }
+
+                if('\n' == getToken())
+                {
+                    nextToken(state);
+                    if (qLinha())
+                    {
+                        return true;
+                    }
+                    return true;
+                }
+
+                if('$' == getToken())
                 {
                     return true;
                 }
-                return true;
+                error(state, "quebra de linha");
+                return false;
             }
 
             return false;
@@ -156,8 +160,10 @@ namespace SCompiler
         private bool qComando()
         {
             this.state = "Comando";
-            if (qN() != string.Empty)
+            var ln = qN();
+            if (ln != string.Empty)
             {
+                this.lineNumber = ln;
                 if(' ' == getToken())
                 {
                     nextToken(state);
@@ -356,6 +362,24 @@ namespace SCompiler
                 return false;
             }
 
+            if ('e' == getToken())
+            {
+                nextToken(state);
+                if ('n' == getToken())
+                {
+                    nextToken(state);
+                    if ('d' == getToken())
+                    {
+                        index = tokens.Length - 2;
+                        return true;
+                    }
+                    error(state, 'd');
+                    return false;
+                }
+                error(state, 'n');
+                return false;
+            }
+
             error(state, "if", "input", "goto", "rem", "let", "print");
             return false;
         }
@@ -378,9 +402,54 @@ namespace SCompiler
                             if (qId())
                             {
                                 nextToken(state);
+                                if(' ' == getToken())
+                                {
+                                    nextToken(state);
+                                    if (qOpr())
+                                    {
+                                        nextToken(state);
+                                        if (' ' == getToken())
+                                        {
+                                            nextToken(state);
+                                            if (qId())
+                                            {
+                                                return true;
+                                            }
+                                            if (qN() != string.Empty)
+                                            {
+                                                return true;
+                                            }
+                                            errorIdN();
+                                        }
+                                        if (qId())
+                                        {
+                                            return true;
+                                        }
+                                        if (qN() != string.Empty)
+                                        {
+                                            return true;
+                                        }
+                                        errorIdN();
+
+                                        return false;
+                                    }
+                                }
                                 if (qOpr())
                                 {
                                     nextToken(state);
+                                    if(' ' == getToken())
+                                    {
+                                        nextToken(state);
+                                        if (qId())
+                                        {
+                                            return true;
+                                        }
+                                        if (qN() != string.Empty)
+                                        {
+                                            return true;
+                                        }
+                                        errorIdN();
+                                    }
                                     if (qId())
                                     {
                                         return true;
@@ -514,6 +583,298 @@ namespace SCompiler
             if (qId())
             {
                 nextToken(state);
+                if(' ' == getToken())
+                {
+                    nextToken(state);
+                    if (qComp())
+                    {
+                        if (' ' == getToken())
+                        {
+                            nextToken(state);
+                            if (qId())
+                            {
+                                nextToken(state);
+                                if (' ' == getToken())
+                                {
+                                    nextToken(state);
+                                    if ('g' == getToken())
+                                    {
+                                        nextToken(state);
+                                        if ('o' == getToken())
+                                        {
+                                            nextToken(state);
+                                            if ('t' == getToken())
+                                            {
+                                                nextToken(state);
+                                                if ('o' == getToken())
+                                                {
+                                                    nextToken(state);
+                                                    if (' ' == getToken())
+                                                    {
+                                                        nextToken(state);
+                                                        if (qN() != string.Empty)
+                                                        {
+                                                            return true;
+                                                        }
+                                                        errorN();
+                                                        return false;
+                                                    }
+                                                    errorEspaco();
+                                                    return false;
+                                                }
+                                                error(state, 'o');
+                                                return false;
+                                            }
+                                            error(state, 't');
+                                            return false;
+                                        }
+                                        error(state, 'o');
+                                        return false;
+                                    }
+                                    error(state, 'g');
+                                    return false;
+                                }
+                                error(state, ' ');
+                                return false;
+                            }
+                            if (qN() != string.Empty)
+                            {
+                                if (' ' == getToken())
+                                {
+                                    nextToken(state);
+                                    if ('g' == getToken())
+                                    {
+                                        nextToken(state);
+                                        if ('o' == getToken())
+                                        {
+                                            nextToken(state);
+                                            if ('t' == getToken())
+                                            {
+                                                nextToken(state);
+                                                if ('o' == getToken())
+                                                {
+                                                    nextToken(state);
+                                                    if (' ' == getToken())
+                                                    {
+                                                        nextToken(state);
+                                                        if (qN() != string.Empty)
+                                                        {
+                                                            return true;
+                                                        }
+                                                        errorN();
+                                                        return false;
+                                                    }
+                                                    errorEspaco();
+                                                    return false;
+                                                }
+                                                error(state, 'o');
+                                                return false;
+                                            }
+                                            error(state, 't');
+                                            return false;
+                                        }
+                                        error(state, 'o');
+                                        return false;
+                                    }
+                                    error(state, 'g');
+                                    return false;
+                                }
+                                errorEspaco();
+                                return false;
+                            }
+                        }
+                        nextToken(state);
+                        if(' ' == getToken())
+                        {
+                            nextToken(state);
+                            if (qId())
+                            {
+                                nextToken(state);
+                                if (' ' == getToken())
+                                {
+                                    nextToken(state);
+                                    if ('g' == getToken())
+                                    {
+                                        nextToken(state);
+                                        if ('o' == getToken())
+                                        {
+                                            nextToken(state);
+                                            if ('t' == getToken())
+                                            {
+                                                nextToken(state);
+                                                if ('o' == getToken())
+                                                {
+                                                    nextToken(state);
+                                                    if (' ' == getToken())
+                                                    {
+                                                        nextToken(state);
+                                                        if (qN() != string.Empty)
+                                                        {
+                                                            return true;
+                                                        }
+                                                        errorN();
+                                                        return false;
+                                                    }
+                                                    errorEspaco();
+                                                    return false;
+                                                }
+                                                error(state, 'o');
+                                                return false;
+                                            }
+                                            error(state, 't');
+                                            return false;
+                                        }
+                                        error(state, 'o');
+                                        return false;
+                                    }
+                                    error(state, 'g');
+                                    return false;
+                                }
+                                error(state, ' ');
+                                return false;
+                            }
+                            if (qN() != string.Empty)
+                            {
+                                if (' ' == getToken())
+                                {
+                                    nextToken(state);
+                                    if ('g' == getToken())
+                                    {
+                                        nextToken(state);
+                                        if ('o' == getToken())
+                                        {
+                                            nextToken(state);
+                                            if ('t' == getToken())
+                                            {
+                                                nextToken(state);
+                                                if ('o' == getToken())
+                                                {
+                                                    nextToken(state);
+                                                    if (' ' == getToken())
+                                                    {
+                                                        nextToken(state);
+                                                        if (qN() != string.Empty)
+                                                        {
+                                                            return true;
+                                                        }
+                                                        errorN();
+                                                        return false;
+                                                    }
+                                                    errorEspaco();
+                                                    return false;
+                                                }
+                                                error(state, 'o');
+                                                return false;
+                                            }
+                                            error(state, 't');
+                                            return false;
+                                        }
+                                        error(state, 'o');
+                                        return false;
+                                    }
+                                    error(state, 'g');
+                                    return false;
+                                }
+                                errorEspaco();
+                                return false;
+                            }
+                        }
+                        if (qId())
+                        {
+                            nextToken(state);
+                            if (' ' == getToken())
+                            {
+                                nextToken(state);
+                                if ('g' == getToken())
+                                {
+                                    nextToken(state);
+                                    if ('o' == getToken())
+                                    {
+                                        nextToken(state);
+                                        if ('t' == getToken())
+                                        {
+                                            nextToken(state);
+                                            if ('o' == getToken())
+                                            {
+                                                nextToken(state);
+                                                if (' ' == getToken())
+                                                {
+                                                    nextToken(state);
+                                                    if (qN() != string.Empty)
+                                                    {
+                                                        return true;
+                                                    }
+                                                    errorN();
+                                                    return false;
+                                                }
+                                                errorEspaco();
+                                                return false;
+                                            }
+                                            error(state, 'o');
+                                            return false;
+                                        }
+                                        error(state, 't');
+                                        return false;
+                                    }
+                                    error(state, 'o');
+                                    return false;
+                                }
+                                error(state, 'g');
+                                return false;
+                            }
+                            error(state, ' ');
+                            return false;
+                        }
+                        if (qN() != string.Empty)
+                        {
+                            if (' ' == getToken())
+                            {
+                                nextToken(state);
+                                if ('g' == getToken())
+                                {
+                                    nextToken(state);
+                                    if ('o' == getToken())
+                                    {
+                                        nextToken(state);
+                                        if ('t' == getToken())
+                                        {
+                                            nextToken(state);
+                                            if ('o' == getToken())
+                                            {
+                                                nextToken(state);
+                                                if (' ' == getToken())
+                                                {
+                                                    nextToken(state);
+                                                    if (qN() != string.Empty)
+                                                    {
+                                                        return true;
+                                                    }
+                                                    errorN();
+                                                    return false;
+                                                }
+                                                errorEspaco();
+                                                return false;
+                                            }
+                                            error(state, 'o');
+                                            return false;
+                                        }
+                                        error(state, 't');
+                                        return false;
+                                    }
+                                    error(state, 'o');
+                                    return false;
+                                }
+                                error(state, 'g');
+                                return false;
+                            }
+                            errorEspaco();
+                            return false;
+                        }
+                        errorIdN();
+
+                        return false;
+                    }
+                }
                 if (qComp())
                 {
                     if (qId())
@@ -682,6 +1043,21 @@ namespace SCompiler
         private bool qOpr()
         {
             this.state = "Opr";
+            if(' ' == getToken())
+            {
+                nextToken(state);
+                if ('+' == getToken()
+                || '-' == getToken()
+                || '*' == getToken()
+                || '/' == getToken()
+                || '%' == getToken())
+                {
+                    return true;
+                }
+                errorOpr();
+                return false;
+            }
+
             if('+' == getToken()
                 || '-' == getToken()
                 || '*' == getToken()
@@ -753,7 +1129,10 @@ namespace SCompiler
         /// <param name="validos">Tokens validos</param>
         private void error(string estado, params char[] validos)
         {
-            Console.WriteLine("q" + estado + ". Linha: " + lineNumber);
+            Console.WriteLine($"Erro estado q{estado} Linha {lineNumber}");
+            Console.Write("Token encontrado: '" + getToken().ToString() + "' ");
+            Console.Write("Esperado: ");
+
 
             bool first = true;
 
@@ -765,20 +1144,13 @@ namespace SCompiler
                 }
                 else
                 {
-                    Console.WriteLine(" ou ");
+                    Console.Write(" ou ");
                 }
 
-                Console.WriteLine("'" + valido + "'");
+                Console.Write("'" + valido + "'");
             }
 
-            Console.WriteLine(" - '");
-
-            for (int i = index; i < tokens.Length; i++)
-            {
-                Console.WriteLine(tokens[i]);
-            }
-
-            Console.WriteLine("'\n");
+            Console.WriteLine("\n");
         }
 
         /// <summary>
@@ -788,7 +1160,10 @@ namespace SCompiler
         /// <param name="validos">Tokens validos</param>
         private void error(string estado, params string[] validos)
         {
-            Console.WriteLine("q" + estado + ". Linha: " + lineNumber);
+            Console.WriteLine($"Erro estado q{estado} Linha {lineNumber}");
+            Console.Write("Token encontrado: '" + getToken().ToString() + "' ");
+            Console.Write("Esperado: ");
+
 
             bool first = true;
 
@@ -800,35 +1175,23 @@ namespace SCompiler
                 }
                 else
                 {
-                    Console.WriteLine(" ou ");
+                    Console.Write(" ou ");
                 }
 
-                Console.WriteLine("'" + valido + "'");
+                Console.Write("'" + valido + "'");
             }
 
-            Console.WriteLine(" - '");
-
-            for (int i = index; i < tokens.Length; i++)
-            {
-                Console.WriteLine(tokens[i]);
-            }
-
-            Console.WriteLine("'\n");
+            Console.WriteLine("\n");
         }
 
         private void errorId()
         {
-            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
+            error(state, "id (letras a-z)");
         }
 
         private void errorIdN()
         {
-            error(state, 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                        'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-                        'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+            error(state, "id (letras a-z)", "número (0-9)");
         }
 
         private void errorIdNEspaco()
@@ -878,16 +1241,11 @@ namespace SCompiler
         /// <param name="estado">Estado atual</param>
         private void nextToken(string estado)
         {
-            Console.WriteLine("q" + estado + " '" + tokens[index] + "' - '");
+            Console.WriteLine($"Estado atual: q{estado} Token: {this.tokens[index]}");
 
             index +=  1;
 
-            for (int i = index; i < tokens.Length; i++)
-            {
-                Console.WriteLine(tokens[i]);
-            }
-
-            Console.WriteLine("'\n");
+            Console.WriteLine("\n");
         }
 
         public bool parse(string source)
