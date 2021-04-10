@@ -7,6 +7,9 @@ using System.Text;
 namespace SCompiler
 {
     /// <summary>
+    /// Instituição: IESB
+    /// Aluno: Lucas Hipólito 
+    /// Matrícula: 1722130054
     /// Compilador de SIMPLE seguindo os seguintes padrões:
     /// Gramática SIMPLE {N, T, P, S}
     /// N = Símbolos não-terminais = 
