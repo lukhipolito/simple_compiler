@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -74,6 +75,13 @@ namespace SCompiler
         /// </summary>
         private string state;
 
+        /// <summary>
+        /// Controla se existe algum erro
+        /// </summary>
+        private bool hasError = false;
+
+        private List<int> lineIDs = new List<int>();
+
         static void Main(string[] args)
         {
             Program compiler = new Program();
@@ -83,10 +91,10 @@ namespace SCompiler
                 pathBuiler.Append(arg);
             }
             string path = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-            var splitedPath = path.Split("SIMPLE Compiler");
+            var splitedPath = path.Split("bin");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                path = Path.Combine(splitedPath[0], $"SIMPLE Compiler\\SCompiler\\SCompiler\\{pathBuiler}");
+                path = Path.Combine(splitedPath[0], $"{pathBuiler}");
             }
             else
             {
@@ -106,10 +114,12 @@ namespace SCompiler
         private bool qPrograma()
         {
             this.state = "Programa";
+            this.hasError = false;
             if (qLinha())
             {
-                return true;
+                return !hasError;
             }
+
             return false;
         }
 
@@ -160,23 +170,81 @@ namespace SCompiler
         private bool qComando()
         {
             this.state = "Comando";
+            int count = 0;
+            while (count < 3)
+            {
+                if (qComandoA())
+                {
+                    break;
+                }
+                nextToken(state);
+                count++;
+            }
+            if(count == 3)
+            {
+                hasError = true;
+                return false;
+            }
+            return true;
+        }
+
+        private bool qComandoA()
+        {
             var ln = qN();
             if (ln != string.Empty)
             {
                 this.lineNumber = ln;
-                if(' ' == getToken())
+                var lineID = Convert.ToInt32(this.lineNumber);
+                if (lineIDs.Count == 0)
                 {
-                    nextToken(state);
-                    if (qPalavra())
+                    lineIDs.Add(lineID);
+                }
+                else
+                {
+                    var last = lineIDs[lineIDs.Count - 1];
+                    if(lineID <= last)
                     {
-                        return true;
+                        errorSemantico("Rótulo de linha menor ou igual a algum anterior", "Os rótulos devem ser crescentes e nunca devem se repetir");
                     }
+                    else
+                    {
+                        lineIDs.Add(lineID);
+                    }
+                }
+                int countA = 0;
+                while (countA < 3)
+                {
+                    if (qComandoB())
+                    {
+                        break;
+                    }
+                    nextToken(state);
+                    countA++;
+                }
+                if(countA == 3)
+                {
+                    hasError = true;
                     return false;
                 }
-                errorEspaco();
-                return false;
+                return true;
             }
             errorN();
+            return false;
+        }
+
+        private bool qComandoB()
+        {
+            if (' ' == getToken())
+            {
+                nextToken(state);
+                if (qPalavra())
+                {
+                    return true;
+                }
+                hasError = true;
+                return false;
+            }
+            errorEspaco();
             return false;
         }
 
@@ -191,6 +259,10 @@ namespace SCompiler
                     nextToken(state);
                     if('m' == getToken())
                     {
+                        while('\r' != getToken())
+                        {
+                            nextToken(state, false);
+                        }
                         return true;
                     }
                     error(state, 'm');
@@ -380,7 +452,7 @@ namespace SCompiler
                 return false;
             }
 
-            error(state, "if", "input", "goto", "rem", "let", "print");
+            error(state, "if", "input", "goto", "rem", "let", "print", "end");
             return false;
         }
 
@@ -1036,7 +1108,6 @@ namespace SCompiler
                 return true;
             }
 
-            errorId();
             return false;
         }
 
@@ -1122,6 +1193,13 @@ namespace SCompiler
             return false;
         }
 
+        private void errorSemantico(string situacaoEncontrada, string situacaoEsperada)
+        {
+            hasError = true;
+            Console.WriteLine($"Erro estado q{state} Linha {lineNumber}");
+            Console.WriteLine($"Comportamento: {situacaoEncontrada}. Esperado: {situacaoEsperada}\n");
+        }
+
         /// <summary>
         /// Apresenta a mensagem de erro
         /// </summary>
@@ -1129,6 +1207,7 @@ namespace SCompiler
         /// <param name="validos">Tokens validos</param>
         private void error(string estado, params char[] validos)
         {
+            hasError = true;
             Console.WriteLine($"Erro estado q{estado} Linha {lineNumber}");
             Console.Write("Token encontrado: '" + getToken().ToString() + "' ");
             Console.Write("Esperado: ");
@@ -1160,6 +1239,7 @@ namespace SCompiler
         /// <param name="validos">Tokens validos</param>
         private void error(string estado, params string[] validos)
         {
+            hasError = true;
             Console.WriteLine($"Erro estado q{estado} Linha {lineNumber}");
             Console.Write("Token encontrado: '" + getToken().ToString() + "' ");
             Console.Write("Esperado: ");
@@ -1239,9 +1319,12 @@ namespace SCompiler
         /// Pula para o proximo token
         /// </summary>
         /// <param name="estado">Estado atual</param>
-        private void nextToken(string estado)
+        private void nextToken(string estado, bool print = true)
         {
-            Console.WriteLine($"Estado atual: q{estado} Token: {this.tokens[index]}");
+            if (print)
+            {
+                Console.WriteLine($"Estado atual: q{estado} Token: {this.tokens[index]}");
+            }
 
             index +=  1;
 
