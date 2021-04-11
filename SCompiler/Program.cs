@@ -262,10 +262,18 @@ namespace SCompiler
                     nextToken(state);
                     if('m' == getToken())
                     {
+                        int count = 0;
                         while('\r' != getToken())
                         {
+                            if (count == 100)
+                            {
+                                errorSemantico("Nenhum token encontrado depois da palavra-chave 'rem'", "'rem' não pode ser a última palavra-chave do programa. Favor utilziar 'end'");
+                                return false;
+                            }
                             nextToken(state, false);
+                            count++;
                         }
+                        
                         return true;
                     }
                     error(state, 'm');
